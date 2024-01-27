@@ -4,7 +4,6 @@ from flask import jsonify
 from werkzeug.security import generate_password_hash
 from pytz import timezone
 import datetime
-from app.models import Message
 from time import time
 import string
 import random
@@ -40,15 +39,6 @@ def send_result(data: any = None, message_id: str = '', message: str = "OK", cod
         "duration": duration,
         "dynamic": is_dynamic
     }
-    message_obj = Message.query.filter_by(message_id=message_id).first()
-    if message_obj:
-        if message_dict['dynamic'] == 0:
-            message_dict['text'] = message_obj.message
-        else:
-            message_dict['text'] = message_obj.message.format(**val_error)
-        message_dict['status'] = message_obj.status
-        message_dict['show'] = message_obj.show
-        message_dict['duration'] = message_obj.duration
 
     res = {
         "code": code,
@@ -84,16 +74,7 @@ def send_error(data: any = None, message_id: str = '', message: str = "Error", c
         "duration": duration,
         "dynamic": is_dynamic
     }
-    message_obj = Message.query.filter_by(message_id=message_id).first()
-    if message_obj:
-        if message_dict['dynamic'] == 0:
-            message_dict['text'] = message_obj.message
-        else:
-            message_dict['text'] = message_obj.message.format(**val_error)
 
-        message_dict['status'] = message_obj.status
-        message_dict['show'] = message_obj.show
-        message_dict['duration'] = message_obj.duration
 
     res = {
         "code": code,
@@ -104,16 +85,7 @@ def send_error(data: any = None, message_id: str = '', message: str = "Error", c
     return jsonify(res), code
 
 
-def hash_password(str_pass):
-    """
 
-    Args:
-        str_pass:
-
-    Returns:
-
-    """
-    return generate_password_hash(str_pass)
 
 
 def get_timestamp_now():
@@ -168,29 +140,7 @@ def validate_request(validator, request):
         return True, {}, body_request
 
 
-def escape_wildcard(search):
-    """
-    :param search:
-    :return:
-    """
-    search1 = str.replace(search, '\\', r'\\')
-    search2 = str.replace(search1, r'%', r'\%')
-    search3 = str.replace(search2, r'_', r'\_')
-    search4 = str.replace(search3, r'[', r'\[')
-    search5 = str.replace(search4, r'"', r'\"')
-    search6 = str.replace(search5, r"'", r"\'")
-    return search6
 
-
-def generate_password():
-    """
-    :return: random password
-    """
-    symbol_list = ["a", "b", "c", "d", "e", "f", "k"]
-    number = '0123456789'
-    letters_and_digits = string.ascii_letters + string.digits
-    result_str = ''.join(random.choices(letters_and_digits, k=6))
-    return '{}{}{}'.format(result_str, random.choice(symbol_list), random.choice(number))
 
 
 def format_birthday(date_string):
