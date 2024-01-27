@@ -32,7 +32,7 @@ def register():
 
         #validate theo yêu cầu
         for key, value in body_request.items():
-            if key in ["first_name", "last_name", "password", "re_password", "email"] and value == "":
+            if key in ["first_name", "last_name", "password", "repassword", "email"] and value == "":
                 return send_error(message=f" Không được để {key} trống.")
             if key in ["first_name", "last_name"] and len(value) > 25:
                 return send_error(message=f" Không được để {key} vượt quá 25 kí tự.")
@@ -43,22 +43,29 @@ def register():
                 return send_error(message=f"Bạn chưa chọn {key}")
             if key == "news" and value not in ["weekly", "monthly", "news_one"]:
                 return send_error(message=f"Bạn chưa chọn {key}")
-        if body_request.get("password") != body_request.get("re_password"):
-            return send_error(message="Bạn nhập chưa đúng mật khẩu")
+        password = body_request.get("password")
+        repassword = body_request.get("repassword")
+        if password != repassword:
+            return send_error(message=f"Bạn nhập chưa đúng mật khẩu.")
 
         email = body_request.get("email")
         if not is_valid_email(email):
             return send_error(message="Bạn nhập chưa đúng format email.")
+
+        query = User.query.filter(User.email == email).first()
+        if query is not None:
+            return send_error(message=f"Email {email} đã được đăng ký ")
         user = User(
             id=str(uuid.uuid4()),
             email=email,
-            password=body_request.get("password"),
+            password=password,
             address=body_request.get("address"),
             first_name=body_request.get("first_name"),
             last_name=body_request.get("last_name"),
             sex=body_request.get("sex", 0),
             language=body_request.get("language"),
-            news=body_request.get("news")
+            news=body_request.get("news"),
+            birth=body_request.get("birthdate")
         )
         db.session.add(user)
         db.session.flush()
